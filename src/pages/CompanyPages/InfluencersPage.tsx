@@ -3,25 +3,15 @@ import { AppLayout } from "../../components/layout/AppLayout";
 import { Card } from "../../components/ui/Card";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { InfluencerCard } from "../../components/Company/influencerCard";
-import { PromotionSlider } from "../../components/slider";
+import { AIInfluencerInfo } from "../../components/Company/AIInfluencerInfo";
+import { FilterSidebar } from "../../components/Company/FilterSidebar";
 import { UserService } from "../../services/UserService";
 import { ContentCreator } from "../../types";
-import { Filter, X } from "lucide-react";
+import { Filter } from "lucide-react";
+import { Button } from "../../components/ui/Button";
+import { categories } from "../../data/constant";
 
 const userService = new UserService();
-
-const categories = [
-  { name: "Moda", code: "fashion" },
-  { name: "Güzellik", code: "beauty" },
-  { name: "Seyahat", code: "travel" },
-  { name: "Yemek", code: "food" },
-  { name: "Fitness", code: "fitness" },
-  { name: "Teknoloji", code: "tech" },
-  { name: "Oyun", code: "gaming" },
-  { name: "Eğitim", code: "education" },
-  { name: "Spor", code: "sports" },
-  { name: "Müzik", code: "music" },
-];
 
 const STORAGE_KEY = "influencer_filters";
 
@@ -37,6 +27,7 @@ export const InfluencersPage = () => {
   const [contentCreators, setContentCreators] = useState<ContentCreator[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [username, setUsername] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>(() => {
     const savedFilters = localStorage.getItem(STORAGE_KEY);
     return savedFilters
@@ -50,28 +41,18 @@ export const InfluencersPage = () => {
         };
   });
 
-  const getFilterLabel = (
+  const handleFilterChange = (
     field: keyof FilterState,
     value: string | number | undefined
   ) => {
-    if (value === undefined || value === "") return "";
-
-    switch (field) {
-      case "category": {
-        const category = categories.find((cat) => cat.code === value);
-        return category ? category.name : "";
-      }
-      case "minFollowers":
-        return `Min. ${value.toLocaleString()} Takipçi`;
-      case "maxFollowers":
-        return `Maks. ${value.toLocaleString()} Takipçi`;
-      case "minScore":
-        return `Min. ${value} Skor`;
-      case "maxScore":
-        return `Maks. ${value} Skor`;
-      default:
-        return "";
-    }
+    setFilters((prev) => {
+      const newFilters = {
+        ...prev,
+        [field]: value,
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newFilters));
+      return newFilters;
+    });
   };
 
   const handleFilterReset = async (field: keyof FilterState) => {
@@ -85,7 +66,11 @@ export const InfluencersPage = () => {
     });
 
     setIsLoading(true);
+    setContentCreators([]);
+
     try {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       const creators = await userService.searchContentCreators({
         ...filters,
         [field]: field === "category" ? "" : undefined,
@@ -101,24 +86,15 @@ export const InfluencersPage = () => {
       }
     } catch (error) {
       console.error("Filtreli arama hatası:", error);
-    }
-    setIsLoading(false);
-  };
-
-  const handleUsernameReset = async () => {
-    setUsername("");
-    setIsLoading(true);
-    try {
-      const creators = await userService.searchContentCreators(filters);
-      setContentCreators(creators);
-    } catch (error) {
-      console.error("Filtreli arama hatası:", error);
+      setContentCreators([]);
     }
     setIsLoading(false);
   };
 
   const handleSearch = async () => {
     setIsLoading(true);
+    setContentCreators([]);
+
     try {
       if (username.trim()) {
         const isValid = await userService.validateUser(username);
@@ -129,6 +105,8 @@ export const InfluencersPage = () => {
           return;
         }
       }
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       const creators = await userService.searchContentCreators(filters);
 
@@ -142,6 +120,7 @@ export const InfluencersPage = () => {
       }
     } catch (error) {
       console.error("Filtreli arama hatası:", error);
+      setContentCreators([]);
     }
     setIsLoading(false);
   };
@@ -158,30 +137,19 @@ export const InfluencersPage = () => {
     setFilters(defaultFilters);
     setUsername("");
     localStorage.removeItem(STORAGE_KEY);
+    setIsLoading(true);
+    setContentCreators([]);
 
     try {
-      setIsLoading(true);
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       const response = await userService.getContentCreators();
       setContentCreators(response.data);
     } catch (error) {
       console.error("Influencerler getirilirken hata oluştu:", error);
-    } finally {
-      setIsLoading(false);
+      setContentCreators([]);
     }
-  };
-
-  const handleFilterChange = (
-    field: keyof FilterState,
-    value: string | number | null | undefined
-  ) => {
-    setFilters((prev: FilterState) => {
-      const newFilters = {
-        ...prev,
-        [field]: value === null ? undefined : value,
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newFilters));
-      return newFilters;
-    });
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -213,13 +181,32 @@ export const InfluencersPage = () => {
     return (
       <div className="flex flex-col min-h-screen">
         <AppLayout title="Influencerler">
-          <div className="flex justify-center items-center h-[50vh]">
-            <ProgressSpinner
-              style={{ width: "50px", height: "50px" }}
-              strokeWidth="4"
-              fill="var(--surface-ground)"
-              animationDuration=".5s"
-            />
+          <div className="flex flex-col gap-4">
+            <AIInfluencerInfo />
+
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center gap-2">
+                <div className="text-sm text-gray-600">Yükleniyor...</div>
+              </div>
+              <Button
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={() => setIsSidebarOpen(true)}
+                disabled
+              >
+                <Filter className="w-4 h-4" />
+                Filtrele
+              </Button>
+            </div>
+
+            <div className="flex justify-center items-center h-[50vh]">
+              <ProgressSpinner
+                style={{ width: "50px", height: "50px" }}
+                strokeWidth="4"
+                fill="var(--surface-ground)"
+                animationDuration=".5s"
+              />
+            </div>
           </div>
         </AppLayout>
       </div>
@@ -230,221 +217,66 @@ export const InfluencersPage = () => {
     <div className="flex flex-col min-h-screen">
       <AppLayout title="Influencerler">
         <div className="flex flex-col gap-4">
-          <PromotionSlider />
-          <Card className="mb-4">
-            <h1 className="text-3xl font-bold text-[#6b21a8] mb-2 flex items-center gap-2">
-              <Filter className="text-2xl" />
-              Filtreler
-            </h1>
+          <AIInfluencerInfo />
 
-            <div className="mb-4">
-              <div className="flex flex-wrap gap-2">
-                {username && (
-                  <div
-                    className="group flex items-center gap-2 bg-purple-100 px-3 py-1.5 rounded-full text-sm text-purple-700 hover:bg-purple-200 transition-colors cursor-pointer"
-                    onClick={handleUsernameReset}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        handleUsernameReset();
-                      }
-                    }}
-                  >
-                    <span>Kullanıcı: {username}</span>
-                    <X className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center gap-4">
+              <h2 className="text-2xl font-semibold text-purple-900">
+                Influencerler
+              </h2>
+              {Object.entries(filters).some(
+                ([, value]) => value !== undefined && value !== ""
+              ) && (
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-purple-600 font-medium">
+                      Filtreler
+                    </span>
+                    <div className="h-4 w-px bg-gray-300" />
                   </div>
-                )}
-
-                {Object.entries(filters).map(([key, value]) => {
-                  if (value === undefined || value === "") return null;
-                  const field = key as keyof FilterState;
-                  const label = getFilterLabel(field, value);
-                  if (!label) return null;
-
-                  return (
-                    <div
-                      key={field}
-                      className="group flex items-center gap-2 bg-purple-100 px-3 py-1.5 rounded-full text-sm text-purple-700 hover:bg-purple-200 transition-colors cursor-pointer"
-                      onClick={() => handleFilterReset(field)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          handleFilterReset(field);
+                  <div className="flex flex-wrap gap-2">
+                    {filters.category && (
+                      <span className="px-2 py-1 rounded-full bg-purple-50 text-purple-700 text-sm border border-purple-100">
+                        {
+                          categories.find(
+                            (cat) => cat.value === filters.category
+                          )?.label
                         }
-                      }}
-                    >
-                      <span>{label}</span>
-                      <X className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
-                    </div>
-                  );
-                })}
-              </div>
+                      </span>
+                    )}
+                    {filters.minFollowers && (
+                      <span className="px-2 py-1 rounded-full bg-purple-50 text-purple-700 text-sm border border-purple-100">
+                        Min Takipçi: {filters.minFollowers}
+                      </span>
+                    )}
+                    {filters.maxFollowers && (
+                      <span className="px-2 py-1 rounded-full bg-purple-50 text-purple-700 text-sm border border-purple-100">
+                        Max Takipçi: {filters.maxFollowers}
+                      </span>
+                    )}
+                    {filters.minScore && (
+                      <span className="px-2 py-1 rounded-full bg-purple-50 text-purple-700 text-sm border border-purple-100">
+                        Min Skor: {filters.minScore}
+                      </span>
+                    )}
+                    {filters.maxScore && (
+                      <span className="px-2 py-1 rounded-full bg-purple-50 text-purple-700 text-sm border border-purple-100">
+                        Max Skor: {filters.maxScore}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="username"
-                  className="font-medium text-sm text-gray-700"
-                >
-                  Kullanıcı Adı
-                </label>
-                <input
-                  id="username"
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full border rounded px-2 py-1"
-                  aria-label="Kullanıcı adı"
-                  tabIndex={0}
-                  placeholder="Kullanıcı adı ile ara..."
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="category"
-                  className="font-medium text-sm text-gray-700"
-                >
-                  Kategori
-                </label>
-                <select
-                  id="category"
-                  value={filters.category}
-                  onChange={(e) =>
-                    handleFilterChange("category", e.target.value)
-                  }
-                  className="w-full border rounded px-2 py-1"
-                  aria-label="Kategori seç"
-                  tabIndex={0}
-                >
-                  {categories.map((opt) => (
-                    <option key={opt.code} value={opt.code}>
-                      {opt.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="minFollowers"
-                  className="font-medium text-sm text-gray-700"
-                >
-                  Min. Takipçi
-                </label>
-                <input
-                  id="minFollowers"
-                  type="number"
-                  value={filters.minFollowers ?? ""}
-                  onChange={(e) =>
-                    handleFilterChange(
-                      "minFollowers",
-                      e.target.value ? Number(e.target.value) : undefined
-                    )
-                  }
-                  className="w-full border rounded px-2 py-1"
-                  aria-label="Minimum takipçi"
-                  tabIndex={0}
-                  min={0}
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="maxFollowers"
-                  className="font-medium text-sm text-gray-700"
-                >
-                  Maks. Takipçi
-                </label>
-                <input
-                  id="maxFollowers"
-                  type="number"
-                  value={filters.maxFollowers ?? ""}
-                  onChange={(e) =>
-                    handleFilterChange(
-                      "maxFollowers",
-                      e.target.value ? Number(e.target.value) : undefined
-                    )
-                  }
-                  className="w-full border rounded px-2 py-1"
-                  aria-label="Maksimum takipçi"
-                  tabIndex={0}
-                  min={0}
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="minScore"
-                  className="font-medium text-sm text-gray-700"
-                >
-                  Min. Skor
-                </label>
-                <input
-                  id="minScore"
-                  type="number"
-                  value={filters.minScore ?? ""}
-                  onChange={(e) =>
-                    handleFilterChange(
-                      "minScore",
-                      e.target.value ? Number(e.target.value) : undefined
-                    )
-                  }
-                  className="w-full border rounded px-2 py-1"
-                  aria-label="Minimum skor"
-                  tabIndex={0}
-                  min={0}
-                  max={100}
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="maxScore"
-                  className="font-medium text-sm text-gray-700"
-                >
-                  Maks. Skor
-                </label>
-                <input
-                  id="maxScore"
-                  type="number"
-                  value={filters.maxScore ?? ""}
-                  onChange={(e) =>
-                    handleFilterChange(
-                      "maxScore",
-                      e.target.value ? Number(e.target.value) : undefined
-                    )
-                  }
-                  className="w-full border rounded px-2 py-1"
-                  aria-label="Maksimum skor"
-                  tabIndex={0}
-                  min={0}
-                  max={100}
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2 mt-4">
-              <button
-                onClick={handleResetFilters}
-                className="px-4 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors"
-                aria-label="Tüm filtreleri sıfırla"
-              >
-                Tümünü Sıfırla
-              </button>
-              <button
-                onClick={handleSearch}
-                className="px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-800 transition-colors"
-                aria-label="Filtreleri uygula"
-              >
-                Filtrele
-              </button>
-            </div>
-          </Card>
-
-          {contentCreators.length > 0 && (
-            <div className="text-sm text-gray-600 mb-4">
-              {contentCreators.length} sonuç bulundu
-            </div>
-          )}
+            <Button
+              variant="outline"
+              className="flex items-center gap-2"
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <Filter className="w-4 h-4" />
+              Filtrele
+            </Button>
+          </div>
 
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -464,7 +296,8 @@ export const InfluencersPage = () => {
                           Influencer Bulunamadı
                         </h3>
                         <p className="text-gray-600">
-                          Henüz hiç influencer bulunmamaktadır.
+                          Aradığınız kriterlere uygun influencer
+                          bulunmamaktadır.
                         </p>
                       </div>
                     </Card>
@@ -473,6 +306,25 @@ export const InfluencersPage = () => {
               </div>
             </div>
           </div>
+
+          <FilterSidebar
+            isOpen={isSidebarOpen}
+            onClose={() => setIsSidebarOpen(false)}
+            filters={filters}
+            username={username}
+            categories={categories}
+            handleFilterChange={handleFilterChange}
+            handleUsernameChange={setUsername}
+            handleSearch={() => {
+              handleSearch();
+              setIsSidebarOpen(false);
+            }}
+            handleResetFilters={() => {
+              handleResetFilters();
+              setIsSidebarOpen(false);
+            }}
+            handleFilterReset={handleFilterReset}
+          />
         </div>
       </AppLayout>
     </div>

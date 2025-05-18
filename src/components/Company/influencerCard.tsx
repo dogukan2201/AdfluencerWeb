@@ -9,11 +9,10 @@ export const InfluencerCard = ({
 }: {
   influencer: ContentCreator;
 }) => {
-  console.log("influencer", influencer);
   return (
     <Link to={`/influencers/${influencer.id}`}>
       <Card className="group hover:shadow-xl transition-all duration-300 h-full overflow-hidden bg-gradient-to-b from-white to-purple-50 border border-purple-100">
-        <div className="px-4 py-3 bg-gradient-to-r from-purple-700 to-purple-500">
+        <div className="px-4 py-3 bg-gradient-to-r from-purple-700 to-purple-500 rounded-t-xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-white" />

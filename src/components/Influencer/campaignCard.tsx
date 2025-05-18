@@ -15,7 +15,7 @@ export const CampaignCard = ({ campaign }: CampaignCardProps) => {
       className="block transition-all duration-300 hover:scale-[1.02]"
       aria-label={`${campaign.title} kampanyasına git`}
     >
-      <Card className="overflow-hidden border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-300">
+      <Card className="overflow-hidden border rounded-xl border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-300">
         <div className="p-5 space-y-4">
           <div className="flex items-center gap-3">
             <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0">

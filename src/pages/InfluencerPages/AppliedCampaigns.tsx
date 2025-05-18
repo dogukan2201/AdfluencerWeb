@@ -31,10 +31,19 @@ export const AppliedCampaigns = () => {
     fetchApplications();
   }, []);
 
+  const getStatusText = (status: 0 | 1 | 2): ApplicationStatus => {
+    const statusMap: Record<number, ApplicationStatus> = {
+      0: "Beklemede",
+      1: "Kabul Edildi",
+      2: "Reddedildi",
+    };
+    return statusMap[status];
+  };
+
   const getStatusCounts = () => {
     return applications.reduce(
       (acc, application) => {
-        const status = application.status as ApplicationStatus;
+        const status = getStatusText(application.status);
         acc[status]++;
         return acc;
       },
@@ -149,7 +158,39 @@ export const AppliedCampaigns = () => {
             className="font-medium"
           />
           <Column field="campaignId" header="Şirket" sortable />
-          <Column field="status" header="Durum" sortable />
+          <Column
+            field="status"
+            header="Durum"
+            sortable
+            body={(rowData) => {
+              const status = getStatusText(rowData.status);
+              const statusConfig = {
+                Beklemede: {
+                  icon: <Clock3 className="w-4 h-4 text-yellow-600" />,
+                  className: "bg-yellow-50 text-yellow-700",
+                },
+                "Kabul Edildi": {
+                  icon: <CheckCircle2 className="w-4 h-4 text-green-600" />,
+                  className: "bg-green-50 text-green-700",
+                },
+                Reddedildi: {
+                  icon: <XCircle className="w-4 h-4 text-red-600" />,
+                  className: "bg-red-50 text-red-700",
+                },
+              };
+
+              return (
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`px-2 py-1 rounded-full text-sm flex items-center gap-1.5 ${statusConfig[status].className}`}
+                  >
+                    {statusConfig[status].icon}
+                    {status}
+                  </span>
+                </div>
+              );
+            }}
+          />
         </DataTable>
       </div>
     </div>

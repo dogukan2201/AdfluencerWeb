@@ -24,6 +24,9 @@ import { AppliedCampaigns } from "./pages/InfluencerPages/AppliedCampaigns";
 import { CampaignDetailPage } from "./pages/InfluencerPages/CampaignDetailPage";
 import { ManageCampaignPage } from "./pages/CompanyPages/ManageCampaignPage";
 import MyInvitationsPage from "./pages/InfluencerPages/MyInvitationsPage";
+import { MyApplicationPage } from "./pages/CompanyPages/MyApplicationPage";
+import SuccessPage from "./pages/CompanyPages/Payment/Success";
+import RejectPage from "./pages/CompanyPages/Payment/Reject";
 
 const PageLayout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
@@ -163,6 +166,23 @@ const AppRoutes = () => {
           }
         />
         <Route
+          path="/payment/success"
+          element={
+            <ProtectedRoute allowedRoles={["Adversiter"]}>
+              <SuccessPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/payment/reject"
+          element={
+            <ProtectedRoute allowedRoles={["Adversiter"]}>
+              <RejectPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/jobs"
           element={
             <ProtectedRoute allowedRoles={["ContentCreator"]}>
@@ -233,6 +253,14 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute allowedRoles={["ContentCreator"]}>
               <MyInvitationsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/applications"
+          element={
+            <ProtectedRoute allowedRoles={["Adversiter"]}>
+              <MyApplicationPage />
             </ProtectedRoute>
           }
         />

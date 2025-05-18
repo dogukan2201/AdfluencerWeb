@@ -339,7 +339,12 @@ export const InfluencerProfile = () => {
             <Button variant="outline" onClick={() => setShowScoreModal(false)}>
               İptal
             </Button>
-            <Button onClick={calculateScore}>Hesapla</Button>
+            <Button
+              onClick={calculateScore}
+              className="bg-purple-600 text-white hover:bg-purple-700"
+            >
+              Hesapla
+            </Button>
           </div>
         }
       >
@@ -355,8 +360,6 @@ export const InfluencerProfile = () => {
                   setScoreData({ ...scoreData, followerCount: e.value || 0 })
                 }
                 mode="decimal"
-                minFractionDigits={2}
-                maxFractionDigits={2}
                 min={0}
                 className="w-full"
                 placeholder="Örn: 3.50"
@@ -375,8 +378,6 @@ export const InfluencerProfile = () => {
                   setScoreData({ ...scoreData, avgLikes: e.value || 0 })
                 }
                 mode="decimal"
-                minFractionDigits={2}
-                maxFractionDigits={2}
                 min={0}
                 className="w-full"
                 placeholder="Örn: 3.50"
@@ -395,8 +396,6 @@ export const InfluencerProfile = () => {
                   setScoreData({ ...scoreData, posts: e.value || 0 })
                 }
                 mode="decimal"
-                minFractionDigits={2}
-                maxFractionDigits={2}
                 min={0}
                 className="w-full"
                 placeholder="Örn: 40"
@@ -415,8 +414,6 @@ export const InfluencerProfile = () => {
                   setScoreData({ ...scoreData, totalLikes: e.value || 0 })
                 }
                 mode="decimal"
-                minFractionDigits={2}
-                maxFractionDigits={2}
                 min={0}
                 className="w-full"
                 placeholder="Örn: 85.00"
@@ -438,8 +435,6 @@ export const InfluencerProfile = () => {
                   })
                 }
                 mode="decimal"
-                minFractionDigits={2}
-                maxFractionDigits={2}
                 min={0}
                 className="w-full"
                 placeholder="Örn: 85.00"
@@ -461,8 +456,6 @@ export const InfluencerProfile = () => {
                   })
                 }
                 mode="decimal"
-                minFractionDigits={2}
-                maxFractionDigits={2}
                 min={0}
                 className="w-full"
                 placeholder="Örn: 0.63"

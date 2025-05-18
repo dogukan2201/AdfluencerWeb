@@ -72,7 +72,7 @@ export const MyCampaigns = () => {
   return (
     <AppLayout title="Kampanyalarım">
       <Toast ref={toast} />
-      <div className="px-4 sm:px-6 lg:px-8 ">
+      <div className="px-4 sm:px-6 lg:px-8">
         <div className="bg-gradient-to-r from-purple-50 to-white rounded-2xl p-8 mb-8 border border-purple-100">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
@@ -103,7 +103,7 @@ export const MyCampaigns = () => {
         ) : campaigns.length === 0 ? (
           <Card className="text-center py-12">
             <CardBody>
-              <div className="flex flex-col items-center">
+              <div className="flex flex-col items-center rounded-xl">
                 <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
                   <Users className="w-8 h-8 text-purple-600" />
                 </div>
@@ -127,7 +127,7 @@ export const MyCampaigns = () => {
             </CardBody>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
             {campaigns.map((campaign) => (
               <motion.div
                 key={campaign.id}
@@ -136,14 +136,14 @@ export const MyCampaigns = () => {
                 transition={{ duration: 0.3 }}
               >
                 <Card
-                  className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer border border-purple-100"
+                  className="h-full hover:shadow-lg  transition-all duration-300 cursor-pointer border border-purple-100"
                   onClick={() =>
                     navigate("/manage-campaign", {
                       state: { campaign },
                     })
                   }
                 >
-                  <CardHeader className="border-b border-purple-100 p-4 bg-gradient-to-r from-purple-50 to-white">
+                  <CardHeader className="border-b border-purple-100  rounded-xl p-4 bg-purple-50">
                     <div className="flex justify-between items-start">
                       <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">
                         {campaign.title}

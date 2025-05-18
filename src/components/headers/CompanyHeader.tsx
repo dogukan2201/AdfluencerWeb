@@ -13,6 +13,7 @@ import {
   Mail,
   User as UserIcon,
   LayoutGrid,
+  Hand,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Dialog } from "primereact/dialog";
@@ -98,6 +99,13 @@ export const CompanyHeader = () => {
             >
               <MessageCircle className="w-5 h-5" />
               <span className="hidden lg:inline">Mesajlar</span>
+            </Link>
+            <Link
+              to="/applications"
+              className="text-gray-600 hover:text-purple-700 transition-colors font-medium flex items-center gap-2 whitespace-nowrap"
+            >
+              <Hand className="w-5 h-5" />
+              <span className="hidden lg:inline">Başvurular</span>
             </Link>
           </nav>
 

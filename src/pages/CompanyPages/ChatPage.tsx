@@ -6,6 +6,8 @@ import { MessageService, Message } from "../../services/MessageService";
 import * as signalR from "@microsoft/signalr";
 import { jwtDecode } from "jwt-decode";
 import { useRef } from "react";
+import { Menu, Wallet, X } from "lucide-react";
+import { AppLayout } from "../../components/layout/AppLayout";
 
 const AdversiterChatPage: React.FC = () => {
   const campaignService = new CampaignService();
@@ -26,6 +28,7 @@ const AdversiterChatPage: React.FC = () => {
   );
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showUserList, setShowUserList] = useState(true);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   useEffect(() => {
     const fetchCreator = async (creatorId: number) => {
@@ -166,13 +169,13 @@ const AdversiterChatPage: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
-      <div className="container mx-auto p-4 md:p-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-8">
-          Mesajlarım
-        </h1>
+  const handlePaymentConfirm = () => {
+    setShowPaymentModal(false);
+  };
 
+  return (
+    <AppLayout title="Mesajlarım">
+      <div className="container mx-auto p-4 md:p-6">
         <div className="flex flex-col md:flex-row gap-4 md:gap-6 h-[calc(100vh-8rem)] md:h-[calc(100vh-14rem)]">
           <div className="md:hidden flex justify-between items-center bg-white p-4 rounded-xl shadow-lg mb-2">
             <h2 className="font-semibold text-gray-800">İçerik Üreticileri</h2>
@@ -180,20 +183,7 @@ const AdversiterChatPage: React.FC = () => {
               onClick={() => setShowUserList(!showUserList)}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 text-gray-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
+              <Menu className="h-6 w-6 text-gray-600" />
             </button>
           </div>
 
@@ -272,7 +262,7 @@ const AdversiterChatPage: React.FC = () => {
                         />
                         <div className="absolute -bottom-1 -right-1 w-3 h-3 md:w-4 md:h-4 bg-green-400 rounded-full border-2 border-white"></div>
                       </div>
-                      <div>
+                      <div className="flex-1">
                         <h3 className="font-semibold text-gray-900 text-base md:text-lg">
                           {
                             creators[selectedAgreement.contentCreatorId]
@@ -283,6 +273,13 @@ const AdversiterChatPage: React.FC = () => {
                           {selectedAgreement.title}
                         </p>
                       </div>
+                      <button
+                        className="bg-purple-600 text-white px-4 py-2 cursor-pointer rounded-xl hover:bg-purple-700 transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md flex items-center gap-2"
+                        onClick={() => setShowPaymentModal(true)}
+                      >
+                        <Wallet className="w-4 h-4" />
+                        Ödeme Yap
+                      </button>
                     </>
                   )}
                 </div>
@@ -443,8 +440,76 @@ const AdversiterChatPage: React.FC = () => {
             )}
           </div>
         </div>
+
+        {showPaymentModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 relative">
+              <button
+                onClick={() => setShowPaymentModal(false)}
+                className="absolute right-4 top-4 text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="text-center mb-6">
+                <Wallet className="w-12 h-12 text-purple-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  Ödeme Onayı
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  {selectedAgreement &&
+                    creators[selectedAgreement.contentCreatorId]?.username}{" "}
+                  adlı içerik üreticisine
+                  {selectedAgreement && ` ${selectedAgreement.budget} TL`}{" "}
+                  tutarında ödeme yapılacaktır.
+                </p>
+              </div>
+
+              <div className="bg-purple-50 rounded-xl p-4 mb-6">
+                <h4 className="font-medium text-purple-900 mb-2">
+                  Ödeme Detayları
+                </h4>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex justify-between">
+                    <span className="text-gray-600">Anlaşma Başlığı:</span>
+                    <span className="font-medium text-gray-900">
+                      {selectedAgreement?.title}
+                    </span>
+                  </li>
+                  <li className="flex justify-between">
+                    <span className="text-gray-600">Tutar:</span>
+                    <span className="font-medium text-gray-900">
+                      {selectedAgreement?.budget} TL
+                    </span>
+                  </li>
+                  <li className="flex justify-between">
+                    <span className="text-gray-600">Tarih:</span>
+                    <span className="font-medium text-gray-900">
+                      {new Date().toLocaleDateString("tr-TR")}
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowPaymentModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors text-sm font-medium"
+                >
+                  İptal
+                </button>
+                <button
+                  onClick={handlePaymentConfirm}
+                  className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors text-sm font-medium"
+                >
+                  Ödemeyi Onayla
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-    </div>
+    </AppLayout>
   );
 };
 
